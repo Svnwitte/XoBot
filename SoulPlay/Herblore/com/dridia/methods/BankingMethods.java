@@ -61,4 +61,43 @@ public class BankingMethods {
             }
         }
     }
+
+    public static boolean needDecBank() {
+        return (!Inventory.Contains(Data.finishedId));
+    }
+
+    public static void doDecBank() {
+        final GameObject bank = GameObjects.getNearest(26972);
+
+        if (bank != null && bank.getDistance() <= 3 && !Bank.isOpen()) {
+            bank.interact("Bank");
+            Methods.conditionalSleep(new SleepCondition() {
+                @Override
+                public boolean isValid() {
+                    return Bank.isOpen();
+                }
+            }, 5000);
+        }
+
+        if (Bank.isOpen()) {
+            if (Inventory.getCount() > 0) {
+                Bank.depositAll();
+                Time.sleep(490, 590);
+            }
+            if (!Inventory.Contains(Data.finishedId)) {
+                Item potion = Bank.getItem(Data.finishedId);
+                if (potion != null) {
+                    Bank.withdraw(Data.finishedId, 28);
+                    Methods.conditionalSleep(new SleepCondition() {
+                        @Override
+                        public boolean isValid() {
+                            return Inventory.Contains(Data.finishedId);
+                        }
+                    }, 3000);
+                }else{
+                    Data.outOfSupplies = true;
+                }
+            }
+        }
+    }
 }

@@ -6,4 +6,5 @@ public class Data {
 	public static int mainIng = 0;
 	public static boolean outOfSupplies = false;
 
+	public static int finishedId;
 }

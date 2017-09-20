@@ -1,21 +1,26 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import com.dridia.methods.DecantingMethods;
 import xobot.client.callback.listeners.MessageListener;
 import xobot.client.callback.listeners.PaintListener;
 import xobot.script.ActiveScript;
 import xobot.script.Manifest;
+import xobot.script.methods.NPCs;
+import xobot.script.methods.Packets;
 import xobot.script.methods.tabs.Skills;
 import xobot.script.util.Time;
 import xobot.script.util.Timer;
 import com.dridia.methods.BankingMethods;
 import com.dridia.methods.HerbloreMethods;
 import com.dridia.data.Data;
+import xobot.script.wrappers.interactive.NPC;
 
 
 import javax.swing.*;
 
-@Manifest(authors = { "Dridia" }, name = "Dridia's Potion Maker", version = 1.1, description = "Makes unfinished and finished potions")
+@Manifest(authors = { "Dridia" }, name = "Dridia's Potion Maker (Local)", version = 1.1, description = "Makes unfinished and finished potions")
 public class dridiaPotionMaker extends ActiveScript implements PaintListener, MessageListener{
 
 
@@ -24,13 +29,14 @@ public class dridiaPotionMaker extends ActiveScript implements PaintListener, Me
 
     public static int startExp = 0;
     public static int startLvl = 0;
-
-
+    public static boolean decant = false;
+    public static String itemToDecant = "";
+    JComboBox<String> combo;
 
     @Override
     public boolean onStart() {
         JDialog frame = new JDialog();
-        frame.setPreferredSize(new Dimension(300,90));
+        frame.setPreferredSize(new Dimension(300,150));
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         FlowLayout layout = new FlowLayout();
@@ -38,42 +44,25 @@ public class dridiaPotionMaker extends ActiveScript implements PaintListener, Me
         layout.setVgap(5);
         frame.setLayout(layout);
 
-        JComboBox<String> combo = new JComboBox<String>();
+        combo = new JComboBox<String>();
         combo.setPreferredSize(new Dimension(200,30));
         combo.setFocusable(false);
-        combo.addItem("Guam potion (unf)");
-        combo.addItem("Attack potion (3)");
 
-        combo.addItem("Harralander potion (unf)");
-        combo.addItem("Combat potion (3)");
+        mixingAlternatives();
 
-        combo.addItem("Ranarr potion (unf)");
-        combo.addItem("Prayer potion (3)");
-
-        combo.addItem("Snapdragon potion (unf)");
-        combo.addItem("Super restore (3)");
-
-        combo.addItem("Irit Potion (unf)");
-        combo.addItem("Super Attack (3)");
-
-        combo.addItem("Kwuarm Potion (unf)");
-        combo.addItem("Super strength (3)");
-
-        combo.addItem("Cadantine Potion (unf)");
-        combo.addItem("Super Defence (3)");
-
-        combo.addItem("Lantadyme Potion (unf)");
-        combo.addItem("Magic Potion (3)");
-
-        combo.addItem("Dwarf Weed Potion (unf)");
-        combo.addItem("Ranging Potion (3)");
-
-        combo.addItem("Extreme Attack (3)");
-        combo.addItem("Extreme Strength (3)");
-        combo.addItem("Extreme Defence (3)");
-        combo.addItem("Extreme Magic (3)");
-
-
+        JCheckBox decantPotion = new JCheckBox("Decant Potion");
+        decantPotion.setPreferredSize(new Dimension(150,32));
+        decantPotion.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent actionEvent) {
+                AbstractButton abstractButton = (AbstractButton) actionEvent.getSource();
+                decant = abstractButton.getModel().isSelected();
+                if(decant){
+                    decantingAlternatives();
+                }else{
+                    mixingAlternatives();
+                }
+            }
+        });
 
         JButton button = new JButton("Start");
         button.setFocusable(false);
@@ -83,6 +72,9 @@ public class dridiaPotionMaker extends ActiveScript implements PaintListener, Me
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 switch(combo.getSelectedItem().toString()) {
+                    case "--Select a potion--":
+                        onStop();
+                        break;
                     case "Extreme Magic (3)":
                         Data.mainIng = 9594;
                         Data.secondaryIng = 3042;
@@ -162,6 +154,7 @@ public class dridiaPotionMaker extends ActiveScript implements PaintListener, Me
                     case "Combat potion (3)":
                         Data.mainIng = 9736;
                         Data.secondaryIng = 97;
+                        Data.finishedId = 9741;
                         break;
                     case "Snapdragon potion (unf)":
                         Data.mainIng = 227;
@@ -175,6 +168,7 @@ public class dridiaPotionMaker extends ActiveScript implements PaintListener, Me
                         onStop();
                         break;
                 }
+                itemToDecant = combo.getSelectedItem().toString();
                 frame.dispose();
                 runTime = new Timer(System.currentTimeMillis());
                 startExp = Skills.getCurrentExp(Skills.HERBLORE);
@@ -186,6 +180,7 @@ public class dridiaPotionMaker extends ActiveScript implements PaintListener, Me
 
         frame.add(combo);
         frame.add(button);
+        frame.add(decantPotion);
         frame.setTitle("Dridia's Potion Maker");
 
 
@@ -204,22 +199,25 @@ public class dridiaPotionMaker extends ActiveScript implements PaintListener, Me
 
     @Override
     public int loop() {
-        if (HerbloreMethods.canMix()) {
-            HerbloreMethods.doMix();
-        }else if(Data.outOfSupplies){
-            return -1;
-        } else if(BankingMethods.needBank() && BankingMethods.canBank()) {
-            BankingMethods.doBank();
+        if (!decant){
+            if (HerbloreMethods.canMix()) {
+                HerbloreMethods.doMix();
+            }else if(Data.outOfSupplies){
+                return -1;
+            } else if(BankingMethods.needBank() && BankingMethods.canBank()) {
+                BankingMethods.doBank();
+            }
+        }else{
+            //Decanting should be simplified
+            if(DecantingMethods.canDecant()) {
+                DecantingMethods.doDecant();
+            }else if(Data.outOfSupplies) {
+                return -1;
+            }else if(BankingMethods.canBank() && BankingMethods.needDecBank()){
+                BankingMethods.doDecBank();
+            }
         }
         return 100;
-    }
-
-    public static int getMainIng(){
-        return Data.mainIng;
-    }
-
-    public static int getSecondaryIng(){
-        return Data.secondaryIng;
     }
 
     private final Color color = new Color(19, 197, 255);
@@ -236,9 +234,14 @@ public class dridiaPotionMaker extends ActiveScript implements PaintListener, Me
         graph.setColor(color);
         graph.drawString("Dridia's Potion Maker v1.1", 10, 20);
         graph.drawString("Runtime: " + runTime.toElapsedString(), 10, 35);
-        graph.drawString("XP Gained: " + (int)xpGained, 10, 50);
-        graph.drawString("XP/h: " + perHour, 10, 65);
-        graph.drawString("Current lvl: " + currentLvl + "(" + "+" + (currentLvl-startLvl) + ")", 10, 80);
+        if(!decant) {
+            graph.drawString("XP Gained: " + (int) xpGained, 10, 50);
+            graph.drawString("XP/h: " + perHour, 10, 65);
+            graph.drawString("Current lvl: " + currentLvl + "(" + "+" + (currentLvl-startLvl) + ")", 10, 80);
+        }else{
+            graph.drawString("Decanting " + itemToDecant + " -> (4)", 10, 50);
+        }
+
     }
 
     @Override
@@ -246,5 +249,63 @@ public class dridiaPotionMaker extends ActiveScript implements PaintListener, Me
         // TODO Auto-generated method stub
 
     }
+
+    public void mixingAlternatives(){
+        combo.removeAllItems();
+        combo.addItem("--Mix potion--");
+
+        combo.addItem("Guam potion (unf)");
+        combo.addItem("Attack potion (3)");
+
+        combo.addItem("Harralander potion (unf)");
+        combo.addItem("Combat potion (3)");
+
+        combo.addItem("Ranarr potion (unf)");
+        combo.addItem("Prayer potion (3)");
+
+        combo.addItem("Snapdragon potion (unf)");
+        combo.addItem("Super restore (3)");
+
+        combo.addItem("Irit Potion (unf)");
+        combo.addItem("Super Attack (3)");
+
+        combo.addItem("Kwuarm Potion (unf)");
+        combo.addItem("Super strength (3)");
+
+        combo.addItem("Cadantine Potion (unf)");
+        combo.addItem("Super Defence (3)");
+
+        combo.addItem("Lantadyme Potion (unf)");
+        combo.addItem("Magic Potion (3)");
+
+        combo.addItem("Dwarf Weed Potion (unf)");
+        combo.addItem("Ranging Potion (3)");
+
+        combo.addItem("Extreme Attack (3)");
+        combo.addItem("Extreme Strength (3)");
+        combo.addItem("Extreme Defence (3)");
+        combo.addItem("Extreme Magic (3)");
+
+    }
+
+    public void decantingAlternatives(){
+        combo.removeAllItems();
+        combo.addItem("--Decant potion--");
+        //combo.addItem("Attack potion (3)");
+        combo.addItem("Combat potion (3)");
+        /*combo.addItem("Prayer potion (3)");
+        combo.addItem("Super restore (3)");
+        combo.addItem("Super Attack (3)");
+        combo.addItem("Super strength (3)");
+        combo.addItem("Super Defence (3)");
+        combo.addItem("Magic Potion (3)");
+        combo.addItem("Ranging Potion (3)");
+        combo.addItem("Extreme Attack (3)");
+        combo.addItem("Extreme Strength (3)");
+        combo.addItem("Extreme Defence (3)");
+        combo.addItem("Extreme Magic (3)");*/
+
+    }
+    
 }
 
