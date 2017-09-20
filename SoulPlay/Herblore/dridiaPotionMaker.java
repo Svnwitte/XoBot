@@ -20,7 +20,7 @@ import xobot.script.wrappers.interactive.NPC;
 
 import javax.swing.*;
 
-@Manifest(authors = { "Dridia" }, name = "Dridia's Potion Maker (Local)", version = 1.1, description = "Makes unfinished and finished potions")
+@Manifest(authors = { "Dridia" }, name = "Dridia's Potion Maker", version = 2.0, description = "Makes unfinished and finished potions and decants Combat potions.")
 public class dridiaPotionMaker extends ActiveScript implements PaintListener, MessageListener{
 
 
@@ -232,7 +232,7 @@ public class dridiaPotionMaker extends ActiveScript implements PaintListener, Me
         Graphics2D graph = (Graphics2D)g;
 
         graph.setColor(color);
-        graph.drawString("Dridia's Potion Maker v1.1", 10, 20);
+        graph.drawString("Dridia's Potion Maker v2.0", 10, 20);
         graph.drawString("Runtime: " + runTime.toElapsedString(), 10, 35);
         if(!decant) {
             graph.drawString("XP Gained: " + (int) xpGained, 10, 50);
@@ -291,19 +291,7 @@ public class dridiaPotionMaker extends ActiveScript implements PaintListener, Me
     public void decantingAlternatives(){
         combo.removeAllItems();
         combo.addItem("--Decant potion--");
-        //combo.addItem("Attack potion (3)");
-        combo.addItem("Combat potion (3)");
-        /*combo.addItem("Prayer potion (3)");
-        combo.addItem("Super restore (3)");
-        combo.addItem("Super Attack (3)");
-        combo.addItem("Super strength (3)");
-        combo.addItem("Super Defence (3)");
-        combo.addItem("Magic Potion (3)");
-        combo.addItem("Ranging Potion (3)");
-        combo.addItem("Extreme Attack (3)");
-        combo.addItem("Extreme Strength (3)");
-        combo.addItem("Extreme Defence (3)");
-        combo.addItem("Extreme Magic (3)");*/
+        combo.addItem("Combat potion (3)")
 
     }
     
