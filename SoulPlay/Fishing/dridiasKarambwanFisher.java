@@ -120,7 +120,6 @@ public class dridiasKarambwanFisher extends ActiveScript implements PaintListene
     @Override
     public void onInventoryChanged(InventoryEvent inventoryEvent){
         if (inventoryEvent.getNewItem() != null) {
-            //Item oldid = inventoryEvent.getOldItem();
             Item newid = inventoryEvent.getNewItem();
 
             if(newid != null) {
