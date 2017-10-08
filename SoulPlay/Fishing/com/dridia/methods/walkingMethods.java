@@ -23,10 +23,6 @@ public class walkingMethods {
     private static Tile[] pathToRing = {new Tile(3103, 3504), new Tile(3117, 3516), new Tile(3135, 3516), fairyRing};
 
     public static void walkToSmallFishingSpot() {
-            /*GameObject g;
-            if((g = GameObjects.getNearest(12127)) == null){//Cant traverse between spots.
-                walkToFairyRing();
-            }*/
             GameObject g = GameObjects.getNearest(14127);
             if(g != null && !new Tile(2811, 3016).isReachable()) {
                 Packets.sendAction(502, g.uid, g.getX(), g.getY(), g.getId(), 1);
