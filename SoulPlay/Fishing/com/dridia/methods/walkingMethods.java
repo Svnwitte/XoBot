@@ -86,25 +86,5 @@ public class walkingMethods {
         return Math.sqrt((x * x) + (y * y));
 
     }
-
-    public static void walkToFairyRing(){
-        GameObject g;
-        if((g = GameObjects.getNearest(14097)).getDistance() > 5){
-            pathToTile p = new pathToTile(pathToRing);
-            while(!p.destinationReached()){
-                Tile t = p.getNextTile();
-                if(t != null) {
-                    Walking.walkTo(t);
-                    Methods.conditionalSleep(new SleepCondition() {
-                        @Override
-                        public boolean isValid() {
-                            return distanceBetween(t, Players.getMyPlayer().getLocation()) <= 3;
-                        }
-                    }, 10000);
-                }
-            }
-            System.out.print(" Location reached!");
-        }
-    }
 }
 
