@@ -1,4 +1,3 @@
-import com.sun.tools.jdi.Packet;
 import xobot.script.methods.*;
 import xobot.script.methods.tabs.Inventory;
 import xobot.script.util.Time;
